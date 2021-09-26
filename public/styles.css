@@ -1,0 +1,18 @@
+.wrapper {
+  padding: 5px 20px;
+  background-color: #E27D60;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.wrapper fieldset {
+  margin: 20px 0;
+  background-color: #85dcbb;
+}
+
+.wrapper textarea {
+  width: 50%;
+}
+
+.wrapper input:not([type=checkbox]):not([type=radio]) {
+  width: 25%;
+}
