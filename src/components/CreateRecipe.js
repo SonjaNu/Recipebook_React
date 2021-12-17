@@ -1,71 +1,121 @@
 import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
-
-
+import { useHistory } from "react-router-dom";
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Typography from '@mui/material/Typography';
-import Slider from '@mui/material/Slider';
-import Switch from '@mui/material/Switch';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
-import FormGroup from '@mui/material/FormGroup';
 import FormHelperText from '@mui/material/FormHelperText';
 import Box from '@mui/material/Box';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
-import IconButton from '@mui/material/IconButton';
 import HomeIcon from '@mui/icons-material/Home';
+import axios from 'axios';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import AttachmentIcon from '@mui/icons-material/Attachment';
+import AddIcon from '@mui/icons-material/Add';
 
 
-
-const difficulty = [
-    { value: 0, label: '0'},
-    { value: 1, label: '1'},
-    { value: 2, label: '2'}, 
-    { value: 3, label: '3'},
-    { value: 4, label: '4'},
-    { value: 5, label: '5'},
-];
+const url = 'http://localhost:8080';
 
 
 function CreateRecipe() {
+
+  const [recipe, setValues] = useState({
+    id: '',
+    nimi: '', 
+    kategoria: '',
+    ainekset: '',
+    ohje: '',
+    allergia: '',
+    valmistusaika: '', 
+    vaikeus: '', 
+    arvostelut: '', 
+    tahdet: '',
+    picture: []
+  });
+
+  const [viesti, setViesti] = useState('');
+
+
+  const muuta = (e) => {
+    setValues({
+      ...recipe,
+      [e.target.name]: e.target.value
+
+     
+
+    });
     
-    const [checked, setChecked, value, setValue] = useState(true);
-
-    const handleChange = (event) => {
-        setState({
-          ...state,
-          [event.target.name]: event.target.checked,
-        });
-      };
+    console.log(e.target.value);
+  };
 
 
-   /*Allergiatiedot */
-    const [state, setState] = React.useState({
-       vehna: true,
-       maidoton: false,
-        glut: false,
-        sokeri: false,
-        kasvi: false,
-       vege: false,
-        muna: false,
-      });
-      const { vehna, maidoton, glut, sokeri, kasvi, vege, muna } = state;
-      const error = [vehna, maidoton, glut, sokeri, kasvi, vege, muna].filter((v) => v).length < 1;
+  const muutaKuva = (e) => {
+    setValues({
+      ...recipe,
+      picture: e.target.files[0]
+    });
+
+    setViesti('');
+  }
 
 
+  const history = useHistory();
+
+
+  const addRecipe = (e) => {
+    // Kun on kuva
+      const formData = new FormData();
+      formData.append('nimi', recipe.nimi);
+      formData.append('kategoria', recipe.kategoria);
+      formData.append('ainekset', recipe.ainekset);
+      formData.append('ohje', recipe.ohje);
+      formData.append('allergia', recipe.allergia);
+      formData.append('valmistusaika', recipe.valmistusaika);
+      formData.append('vaikeus', recipe.vaikeus);
+      formData.append('arvostelut', recipe.arvostelut);
+      formData.append('tahdet', recipe.tahdet);
+      formData.append('picture', recipe.picture);
+  
+     
+      axios.post(url + '/recipe/add', formData)
+        .then(response => {
+          // Jos lisäys onnistui eli back palautti statuksen 200
+            if (response.status === 200) {
+
+              setViesti('Lisättiin');
+
+              history.push("/nayta");  //palataan kaikki reseptit -sivulle
+              
+              
+            } else {
+                setViesti('Lisäys ei onnistunut');
+              }
+        })
+    }
+
+    let kuvaNimi = '';
+    if (recipe.picture !== null) {
+      kuvaNimi = recipe.picture.name;
+    }
+    
     return (
-    <Paper sx={ {marginTop: 2, marginLeft: 2, padding: 2} }>
+    <Paper sx={ {paddingTop: 2, marginLeft: 4, marginRight: 4, paddingRight: 2, paddingLeft: 2, marginBottom: 2, paddingBottom: 1} }>
      
         <form>
 
-        <FormLabel sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium' }}> Lisää uusi resepti</FormLabel>
+          <Box sx={{paddingBottom: 3}} >
 
-        <FormLabel component="form">Erottele ainekset puolipisteellä, esim. 3 dl jauhoja; 1 dl sokeria; jne.</FormLabel>
+        <FormLabel sx={{ color: 'text.primary', fontSize: 30, fontWeight: 'medium' }}> Lisää uusi resepti</FormLabel>
+
+        <FormLabel component="form">Laita ; aina, kun haluat rivinvaihdon. Esimerkiksi: 3 dl jauhoja; 1 kananmuna tai Paista 200 asteessa.; Tee kuorrutus.</FormLabel>
+        </Box>
+
         <Box
       component="form"
       sx={{
@@ -79,9 +129,12 @@ function CreateRecipe() {
        
           id="name"
           label="Nimi"
+          name='nimi'
           multiline
           rows={1}
           defaultValue="Reseptin nimi"
+          value={ recipe.nimi }
+          onChange={ (e) => muuta(e) }
         />
        </div>
 <div>
@@ -89,9 +142,12 @@ function CreateRecipe() {
        sx={{marginTop: '5cm'}}
           id="needs"
           label="Ainekset"
+          name='ainekset'
           multiline
           rows={8}
           defaultValue="Luettelo aineksista"
+          value={ recipe.ainekset }
+          onChange={ (e) => muuta(e) }
         />
        </div>
 
@@ -100,161 +156,158 @@ function CreateRecipe() {
         margin='normal'
           id="Directions"
           label="Ohje"
+          name='ohje'
           multiline
           rows={10}
           defaultValue="Työohje"
+          value={ recipe.ohje }
+          onChange={ (e) => muuta(e) }
         />
        </div>
-     
-    </Box>
 
-        <FormControl component="fieldset">
-  <FormLabel component="legend" sx={{marginTop: '1cm'}} >Valitse kategoria</FormLabel>
-  <RadioGroup
-    row aria-label="kategoria"
-    defaultValue="leivos"
-    name="radio-buttons-group"
-  >
-   <FormControlLabel value="pastry" control={<Radio />} label="Leivonnaiset" />
-    <FormControlLabel value="snacks" control={<Radio />} label="Naposteltavat" />
-    <FormControlLabel value="sweetpie" control={<Radio />} label="Makeat piirakat" />
-    <FormControlLabel value="pie" control={<Radio />} label="Suolaiset piirakat" />
-    <FormControlLabel value="salad" control={<Radio />} label="Salaatit" />
-    <FormControlLabel value="soup" control={<Radio />} label="Keitot" />
-    <FormControlLabel value="everydayfood" control={<Radio />} label="Arkiruuat" />
-    <FormControlLabel value="starter" control={<Radio />} label="Alkupalat/Kevyet ateriat" />
-    <FormControlLabel value="cake" control={<Radio />} label="Kakut" />
-    <FormControlLabel value="cocktail" control={<Radio />} label="Cocktailit" />
-    <FormControlLabel value="smoothie" control={<Radio />} label="Smoothiet" />
-    <FormControlLabel value="theme" control={<Radio />} label="Teemaruuat/herkut" />
-    <FormControlLabel value="bread" control={<Radio />} label="Leivät" />
-    <FormControlLabel value="dessert" control={<Radio />} label="Jälkiruuat" />
-  </RadioGroup>
-</FormControl>   
+       <div>
+        <TextField
+       sx={{marginTop: '5cm'}}
+          id="needs"
+          label="Erityisruokavalio"
+          name='allergia'
+          multiline
+          rows={3}
+          defaultValue="Tiedot erityisruokavaliosta"
+          value={ recipe.allergia }
+          onChange={ (e) => muuta(e) }
+        />
+       </div>
 
+       <TextField
+        margin='normal'
+          id="arvostelut"
+          label="Lisätietoja reseptistä"
+          name='arvostelut'
+          multiline
+          rows={4}
+          defaultValue="Lisätietoja"
+          value={ recipe.arvostelut }
+          onChange={ (e) => muuta(e) }
+        />
 
+         {/*Valitse kategoria */ }
 
- 
-            <Box sx={{ display: 'flex' }}>
-      <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-        <FormLabel component="legend">Valitse allergiatiedot</FormLabel>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox checked={vehna} onChange={handleChange} name="vehna" />
-            }
-            label="Ei sisällä vehnää"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={maidoton} onChange={handleChange} name="maidoton" />
-            }
-            label="Maidoton"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={glut} onChange={handleChange} name="glut" />
-            }
-            label="Gluteeniton"
-          />
-
-        <FormControlLabel
-            control={
-              <Checkbox checked={sokeri} onChange={handleChange} name="sokeri" />
-            }
-            label="Sokeriton"
-          />
-
-        <FormControlLabel
-            control={
-              <Checkbox checked={kasvi} onChange={handleChange} name="kasvi" />
-            }
-            label="Kasvisruoka"
-          />
-
-        <FormControlLabel
-            control={
-              <Checkbox checked={vege} onChange={handleChange} name="vege" />
-            }
-            label="Vegaaninen"
-          />
-
-        <FormControlLabel
-            control={
-              <Checkbox checked={muna} onChange={handleChange} name="muna" />
-            }
-            label="Kananmunaton"
-          />
-        </FormGroup>
-
-        <FormControl
-        required
-        error={error}
-        component="fieldset"
-        sx={{ m: 3 }}
-        variant="standard"
-      >
+         <FormControl component="fieldset">
+        <FormLabel component="legend" sx={{marginTop: '1cm'}} >Valitse kategoria</FormLabel>
+      <RadioGroup
+        row aria-label="category-radio-buttons-group"
+        name="kategoria"
+        value={recipe.kategoria}
+        onChange={ (e) => muuta(e) }
        
-        <FormHelperText>Valitse vähintään yksi!</FormHelperText>
-      </FormControl>
-      </FormControl>
-     
-    </Box>
+      >
+    <FormControlLabel value="Leivonnaiset" control={<Radio />} label="Leivonnaiset" />
+    <FormControlLabel value="Naposteltavat" control={<Radio />} label="Naposteltavat" />
+    <FormControlLabel value="Makeat piirakat" control={<Radio />} label="Makeat piirakat" />
+    <FormControlLabel value="Suolaiset piirakat" control={<Radio />} label="Suolaiset piirakat" />
+    <FormControlLabel value="Salaatit" control={<Radio />} label="Salaatit" />
+    <FormControlLabel value="Keitot" control={<Radio />} label="Keitot" />
+    <FormControlLabel value="Arkiruuat" control={<Radio />} label="Arkiruuat" />
+    <FormControlLabel value="Alkupalat/Kevyet ateriat" control={<Radio />} label="Alkupalat/Kevyet ateriat" />
+    <FormControlLabel value="Kakut" control={<Radio />} label="Kakut" />
+    <FormControlLabel value="Cocktailit" control={<Radio />} label="Cocktailit" />
+    <FormControlLabel value="Smoothiet" control={<Radio />} label="Smoothiet" />  
+    <FormControlLabel value="Leivät" control={<Radio />} label="Leivät" />
+    <FormControlLabel value="Jälkiruuat" control={<Radio />} label="Jälkiruuat" />
+    <FormControlLabel value="Teemaruuat/herkut" control={<Radio />} label="Teemaruuat/herkut" />
+      </RadioGroup>
+    </FormControl>
 
-    <Button
-  variant="contained"
-  component="label"
->
-  Lataa kuva koneeltasi
-  <input
-    type="file"
-    hidden
-  />
-</Button> 
-<FormHelperText>Halutessasi, voit liittää reseptiin kuvan</FormHelperText>
 
+
+ {/*Valitse valmistusaika */ }
+
+ <FormControl component="fieldset">
+        <FormLabel component="legend" sx={{marginTop: '1cm'}} >Valitse aktiivinen valmistusaika</FormLabel>
+      <RadioGroup
+        row aria-label="time-radio-buttons-group"
+        name="valmistusaika"
+        value={recipe.valmistusaika}
+        onChange={ (e) => muuta(e) }
+       
+      >
+    <FormControlLabel value="10-20 min" control={<Radio />} label="10-20 min" />
+    <FormControlLabel value="20-30 min" control={<Radio />} label="20-30 min" />
+    <FormControlLabel value="30-40 min" control={<Radio />} label="30-40 min" />
+    <FormControlLabel value="40-50 min" control={<Radio />} label="40-50 min" />
+    <FormControlLabel value="noin tunti" control={<Radio />} label="noin tunti" />
+    <FormControlLabel value="1 h 30 min" control={<Radio />} label="1 h 30 min" />
+    <FormControlLabel value="2 tuntia" control={<Radio />} label="2 tuntia" />
+    <FormControlLabel value="yli 2 tuntia" control={<Radio />} label="yli 2 tuntia" />
+  
+      </RadioGroup>
+    </FormControl>
+
+
+     {/*Valitse vaikeustaso */ }
+
+     <FormControl component="fieldset">
+        <FormLabel component="legend" sx={{marginTop: '1cm'}} >Valitse vaikeustaso</FormLabel>
+      <RadioGroup
+        row aria-label="challenging-radio-buttons-group"
+        name="vaikeus"
+        value={recipe.vaikeus}
+        onChange={ (e) => muuta(e) }
+       
+      >
+    <FormControlLabel value="erittäin helppo" control={<Radio />} label="erittäin helppo" />
+    <FormControlLabel value="helppo" control={<Radio />} label="helppo" />
+    <FormControlLabel value="keskivaikea" control={<Radio />} label="keskivaikea" />
+    <FormControlLabel value="vaikea" control={<Radio />} label="vaikea" />
+    <FormControlLabel value="erittäin vaikea" control={<Radio />} label="erittäin vaikea" />
+   
+      </RadioGroup>
+    </FormControl>    
+
+                   
+ {/*Valitse tähtimäärä (--> rating read only) */ }
 
 <FormControl component="fieldset">
-  <FormLabel component="time" sx={{marginTop: '1cm'}} >Valitse aktiivinen valmistusaika</FormLabel>
-  <RadioGroup
-    row aria-label="time"
-    defaultValue="10-20 min"
-    name="radio-buttons-group"
-  >
-    <FormControlLabel value="leivos" control={<Radio />} label="10-20 min" />
-    <FormControlLabel value="napostelu" control={<Radio />} label="20-30 min" />
-    <FormControlLabel value="mapiiras" control={<Radio />} label="30-40 min" />
-    <FormControlLabel value="spiiras" control={<Radio />} label="40-50 min" />
-    <FormControlLabel value="salaatti" control={<Radio />} label="noin tunti" />
-    <FormControlLabel value="keitto" control={<Radio />} label="1 h 30 min" />
-    <FormControlLabel value="arki" control={<Radio />} label="2 tuntia" />
-    <FormControlLabel value="paa" control={<Radio />} label="yli 2 tuntia" />
+        <FormLabel component="legend" sx={{marginTop: '1cm'}} >Valitse tähtimäärä</FormLabel>
+      <RadioGroup
+        row aria-label="stars-radio-buttons-group"
+        name="tahdet"
+        value={recipe.tahdet}
+        onChange={ (e) => muuta(e) }
+       
+      >
+    <FormControlLabel value={1} control={<Radio />} label="1 tähti" />
+    <FormControlLabel value={2} control={<Radio />} label="2 tähteä" />
+    <FormControlLabel value={3} control={<Radio />} label="3 tähteä" />
+    <FormControlLabel value={4} control={<Radio />} label="4 tähteä" />
+    <FormControlLabel value={5} control={<Radio />} label="5 tähteä" />
+   
+  
+      </RadioGroup>
+    </FormControl>
 
-  </RadioGroup>
-</FormControl>  
+ {/*Lisää kuva */ }
 
-            <Typography sx={{marginTop: '1cm'}} >Vaikeusaste</Typography>
-            <FormHelperText>Arvioi reseptin vaikeusaste asteikolla 0-5, jossa 0 on erittäin helppo ja 5 erittäin vaikea</FormHelperText>
-            <Slider
-                valueLabelDisplay='auto'
-                step={ 0.25 }
-                defaultValue={ 2.5 }
-                min={ 0 }
-                max={ 5 }
-                marks={ difficulty }
-                
-            />
+      <Input accept='photos/*' name='picture' id='picture' type='file'
+        onChange={ (e) => muutaKuva(e) } sx={{display: 'none'}} />
 
-            <Typography gutterBottom  sx={{marginTop: '1cm'}} >Lisää suosikkeihin
-                <Switch
-                    checked={ checked }
-                    onChange={ handleChange }
-                    value='checked'
-                />
-            </Typography>
+      <InputLabel htmlFor='picture'>
+        <Typography sx={{ display:'inline'}}>Kuva</Typography>
+        <Button component='span'>
+            <AttachmentIcon />
+        </Button>
+        <Typography sx={{ display:'inline'}}>{ kuvaNimi }</Typography>
+      </InputLabel>
+     
+      </Box>   
+<FormHelperText>Halutessasi, voit liittää reseptiin kuvan</FormHelperText>
 
-            <Button variant='outlined'  sx={ {marginLeft: 115, marginRight: 2} }>Lisää resepti</Button>
-            <Button variant='outlined' color='secondary' component={ Link } to='/' startIcon={ <HomeIcon /> }>Peruuta</Button>
+<Box sx={{ paddingTop: 3}}> 
+        <Button variant='outlined' color='secondary'  component={ Link } to='/nayta' startIcon={ <HomeIcon /> }>Peruuta</Button>
+            <Button onClick={ (e) => addRecipe(e) } variant='outlined' sx={{marginLeft: 5}} startIcon={<AddIcon />}  >Lisää resepti</Button>
+            
+            </Box>   
         </form>
     </Paper>
     ) 

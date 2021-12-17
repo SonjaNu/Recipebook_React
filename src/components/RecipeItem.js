@@ -1,58 +1,80 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import CardActions from '@mui/material/CardActions';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
-import FormLabel from '@mui/material/FormLabel';
-import Paper from '@mui/material/Paper';
-import Rating from '@mui/material/Rating';
-import Avatar from '@mui/material/Avatar';
-import PersonIcon from '@mui/icons-material/Person';
-
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import StarIcon from '@mui/icons-material/Star';
+import CreateIcon from '@mui/icons-material/Create';
 
 const kortti = {
     
   minWidth: 100,
-  maxWidth: 250, 
+  maxWidth: 800, 
   minHeight: 150,
   
+ 
   borderWidth: 1,
   borderStyle: 'solid',
   borderColor: 'black',
   borderRadius: 2
 }
 
-
 function RecipeItem (props) {
+
   let { id } = useParams();
   let { nimi } = useParams();
   let { kategoria } = useParams();
+  let { ainekset } = useParams();
+  let { ohje } = useParams();
+  let { allergia } = useParams(); 
+  let { valmistusaika } = useParams(); 
+  let { vaikeus } = useParams(); 
+  let { arvostelut } = useParams(); 
 
     return (
-      <Card>
-      <CardHeader
-         avatar={ <Avatar><PersonIcon /></Avatar>}
-         title={ nimi }
+      <Box sx={ {paddingTop: 7, paddingLeft: 30, paddingRight: 30, minWidth: 200, minHeight: 200} }> 
+      <Card sx={ kortti }>
+
+
+      <CardHeader 
+         avatar={ <StarIcon />}
+         title={ nimi.toUpperCase() }
          subheader={ kategoria } />
 
       <CardContent>
-          <Typography>Id: { id }</Typography>
+         
+          <Typography variant="h7">  Ainekset: </Typography> 
+          <Typography>  { ainekset.split(";").map(place => <p> {place} </p>)  } </Typography>
+          <Typography variant="h7"> Valmistusohje: </Typography> 
+          <Typography> { ohje.split(";").map(place => <p> {place} </p>) }</Typography>
+          <Typography variant="h7">  Lisätietoja: </Typography>
+          <Typography> { arvostelut.split(";").map(place => <p> {place} </p>) } </Typography>
+          <Typography> <StarIcon /> Erityisruokavalio: { allergia }</Typography>
+          <Typography> <StarIcon /> Valmistusaika: { valmistusaika }</Typography>
+          <Typography> <StarIcon /> Vaikeusaste: { vaikeus }</Typography>
           
+
+
+         
       </CardContent>
 
       <CardActions>
-        <Link to='/nayta'><Typography>Takaisin</Typography></Link>
+        <Button backIcon={<ArrowBackIcon/>} component={ Link } to='/nayta' startIcon={< ArrowBackIcon />}>Takaisin</Button>  
+        <Button backIcon={<ArrowBackIcon/>} component={ Link } to={'/muokkaa/' + id +  '/' + nimi + '/' + kategoria + '/' + allergia + '/' + ainekset + '/' + ohje + '/' + valmistusaika + '/' + vaikeus + '/' + arvostelut} startIcon={<CreateIcon />}>Muokkaa reseptiä</Button>
+ 
       </CardActions>
+          
    </Card>
+                 
+
+   </Box>
+  
   );
 }
 

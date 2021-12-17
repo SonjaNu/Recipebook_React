@@ -1,9 +1,7 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
-import FormLabel from '@mui/material/FormLabel';
 import Typography from '@mui/material/Typography';
 
 export default function FrontPage() {
@@ -14,7 +12,7 @@ export default function FrontPage() {
   for (var i = 0; i < 3; i++) {
     itemDataRandom = itemData[Math.floor(Math.random() * itemData.length)]; // haetaan satunnainen "kuva" itemData-listasta itemDataRandom-muuttujaan
     if (itemDataFinal.indexOf(itemDataRandom) > -1) { // tarkastetaan löytyykö kuva jo itemDataFinal-listasta
-      i--; // jos löytyy, vähennetään i:stä 1, jotta kuvia tulee kuitenkin kollaasiin 4 kpl
+      i--; // jos löytyy, vähennetään i:stä 1, jotta kuvia tulee kuitenkin kollaasiin 3 kpl
     } else { 
       itemDataFinal.push(itemDataRandom); // jos kuvaa ei löydy itemDataFinal listasta ennestään, lisätään se siihen
     }  
@@ -28,11 +26,11 @@ export default function FrontPage() {
 <Box sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium', textAlign: 'center', m: 1 }}>Tervetuloa käyttämään reseptikirjaa!</Box>
       
       <Box sx={{ textAlign: 'center', m: 1, marginTop: '1cm' }}>Tämä sovellus auttaa sinua pitämään elämäsi parhaimmat reseptit tallessa ja järjestyksessä.
-      Aloita luomalla tunnus tai kirjautumalla sisään, niin pääset hyödyntämään kaikkia ominaisuuksia kuten lisäämään ja hallinnoimaan reseptejäsi.</Box>
+     </Box>
       <Box sx={{ textAlign: 'center', m: 1 }}>Voit tallentaa uuden reseptin Lisää resepti -välilehdellä. 
       Näytä reseptit -välilehdellä näet kaikki tallentamasi reseptit ja pääset katsomaan niitä tarkemmin.
-      Reseptihaussa voit hakea reseptejä. Voit merkitä reseptejä suosikeiksi, jolloin löydät ne helposti Suosikkireseptit-välilehden takaa.
-       Jos kaipaat inspiraatiota, kurkkaa Inspiraatio-välilehden taakse.</Box>
+      Reseptihaussa voit hakea reseptejä nimen mukaan.
+       Jos kaipaat inspiraatiota, kurkkaa Inspiraatio-välilehden taakse. Terveysnurkasta löytyy mm. ravintotietotaulukko ja muuta terveelliseen ruokavalioon liittyvää tietoa.</Box>
      
       <Box sx={{ textAlign: 'center', m: 1, fontSize: 20 }}>Nautinnollisia hetkiä reseptien parissa!</Box>
     </Typography>
@@ -55,8 +53,6 @@ export default function FrontPage() {
 );
 }
 
-
-// jos samaa itemData-listaa käytetään täällä ja Inspiration.js:ssä, pitäisikö lista siirtää johonkin yhteiseen paikkaan tai hakea se tänne Inspiration.js-komponentista importtaamalla? 
 const itemData = [
   {
   img: "./photos/pastry.jpg",

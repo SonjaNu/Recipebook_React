@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -9,12 +10,13 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import CardActions from '@mui/material/CardActions';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
 import FormLabel from '@mui/material/FormLabel';
-import Paper from '@mui/material/Paper';
 import Rating from '@mui/material/Rating';
+import FoodBankOutlinedIcon from '@mui/icons-material/FoodBankOutlined';
 
+
+const url = 'http://localhost:8080';
 
 const kortti = {
     
@@ -30,56 +32,77 @@ const kortti = {
 
 function ViewRecipes (props) {
 
-    return (
-        <box>
-        <FormLabel sx={{ color: 'text.primary', fontSize: 34, fontWeight: 'medium', paddingLeft: 4 }}> Selaa reseptejä</FormLabel>
-        <Grid container spacing={4} sx={{paddingTop:4, paddingLeft: 4}}>
+    const [viesti, setViesti] = useState('');
 
+    const deleteRecipe = (id) => {    
+       
+          axios.get(url + '/recipe/delete/' +  id)  /* on oltava get, koska palvelinpuolella RecipeServerissä on get-kutsu, eikä delete */
+            .then(response => {
+
+              // Jos poisto onnistui eli back palautti statuksen 200
+                if (response.status === 200) {
    
+                    window.location.reload(false);
+                    setViesti('Poistettiin');
 
+                } else {
+                    setViesti('Poisto ei onnistunut');
+                  }
+            })
+        }
+
+    return (
+        <Box>
+    
+        <Grid container spacing={4} sx={{paddingTop:4, paddingLeft: 4, paddingBottom: 2}}>
 
             {
               props.recipes.map(recipe => {
                   return (
                     <Grid item key={ recipe.id } >
 
-        <Box sx={ {border: '2px solid lightcoral', minWidth: 200, minHeight: 200} }> 
+                    <Box sx={ {border: '2px solid lightcoral', minWidth: 200, minHeight: 200} }> 
                         <Card sx={ kortti }>
-                            <CardActions>
-                                <Button startIcon={<AccountCircleIcon/>} component={ Link } to={'nayta/' + recipe.id +  '/' + recipe.nimi + '/' + recipe.kategoria}>Näytä</Button>
-                                <Button color='secondary' startIcon={<DeleteIcon />}>Poista</Button>
-                            </CardActions>
+
+                        {
+                                    
+                                    recipe.picture ?
+                                        <CardMedia
+                                        sx={ kortti }
+                                        image={ 'http://localhost:8080/download/' +  recipe.picture }
+                                        title={ recipe.nimi} />
+                                        :
+                                        <Typography sx={ kortti }>Ei kuvaa</Typography> 
+                                }
+
                             <CardHeader         
                                 title={ recipe.nimi }
                                 subheader={ recipe.kategoria } />
                             <CardContent>
 
-                            <Rating name="read-only-cards" value={recipe.tahdet / recipe.arvostelut} readOnly />
-
-                            
-                                {
-                                    
-                                    recipe.picture ?
-                                        <CardMedia
-                                        sx={ kortti }
-                                        image={ recipe.picture }
-                                        title={ recipe.picture } />
-                                        :
-                                        <Typography sx={ kortti }>Ei kuvaa</Typography> 
-                                }
+                            <Rating name="read-only-cards" value={recipe.tahdet} readOnly />
+  
                             </CardContent>
+
+                            <CardActions>
+                                <Button startIcon={<FoodBankOutlinedIcon/>} component={ Link } to={'/hae/' + recipe.id +  '/' + recipe.nimi + '/' + recipe.kategoria + '/' + recipe.allergia + '/' + recipe.ainekset + '/' + recipe.ohje + '/' + recipe.valmistusaika + '/' + recipe.vaikeus + '/' + recipe.arvostelut + '/' + recipe.picture}>Näytä</Button>
+                                <Button  onClick={ (e) => deleteRecipe(recipe.id) } color='secondary'  startIcon={<DeleteIcon />}>Poista
+
+                                
+                                </Button>
+                            </CardActions>
+                           
                         </Card>
 
                         </Box>
                     </Grid>
                 )
                   
- 
-                  
+     
               })  
             }
     </Grid>
-    </box>
+    </Box>
     )
 }
 
